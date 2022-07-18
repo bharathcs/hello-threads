@@ -1,29 +1,37 @@
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class ThreadSafeList {
-  private final List<Character> list;
-  private final int size;
+public class ThreadSafeList<T> {
+  private final List<T> list;
+  private int size;
 
   public ThreadSafeList(int size) {
     this.size = size;
     this.list = new ArrayList<>(size);
   }
 
-  public ThreadSafeList(List<Character> list) {
-    this.list = list;
+  public ThreadSafeList(Collection<? extends T> collection) {
+    this.list = new ArrayList<>(collection);
     this.size = list.size();
   }
 
-  public void setElement(int i, Character c) {
-    checkIndex(i);
+  public void setElement(int index, T element) {
+    checkIndex(index);
     synchronized (list) {
-      list.set(i, c);
+      list.set(index, element);
     }
   }
 
-  public Character getElement(int i) {
+  public boolean isEmpty() {
+    synchronized (list) {
+      return list.isEmpty();
+    }
+  }
+
+  public T getElement(int i) {
     checkIndex(i);
     Character result;
     synchronized (list) {
@@ -31,7 +39,19 @@ public class ThreadSafeList {
     }
   }
 
-  public List<Character> getList() {
+  public Optional<T> pop() {
+    if (size > 0) {
+      synchronized (list) {
+        if (list.size() > 0) {
+          size--;
+          return Optional.of(list.remove(0));
+        }
+      }
+    }
+    return Optional.empty();
+  }
+
+  public List<T> getList() {
     synchronized (list) {
       return list.stream().collect(Collectors.toUnmodifiableList());
     }
