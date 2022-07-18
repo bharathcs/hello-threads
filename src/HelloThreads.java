@@ -10,7 +10,7 @@ public class HelloThreads {
     }
 
     ThreadSafeList dest = new ThreadSafeList(new ArrayList<>(src));
-    CharWorkerPool pool = new CharWorkerPool(src, dest);
+    CharWorkerPool pool = new CharWorkerPool(src, dest, 5);
     return pool.runAndReturn().stream().reduce(
         "", (prevStr, currChar) -> prevStr + currChar, (prevStr, currStr) -> prevStr + currStr);
   }
